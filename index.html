@@ -189,9 +189,9 @@
             preview: document.getElementById('logContent'),
             magStatus: document.getElementById('magStatus'),
             // فیلدهای نمایشی
-            ax: document.getElementById('accelX'), ay: document.getElementById('accelY'), az: document.getElementById('accelZ'), at: document.getElementById('accelTotal'),
+            ax: document.getElementById('accelX'), ay: document.getElementById('accelY'), aZ: document.getElementById('accelZ'), at: document.getElementById('accelTotal'),
             gx: document.getElementById('gyroX'), gy: document.getElementById('gyroY'), gz: document.getElementById('gyroZ'),
-            az: document.getElementById('azimuth'), pi: document.getElementById('pitch'), ro: document.getElementById('roll'),
+            azimuth: document.getElementById('azimuth'), pi: document.getElementById('pitch'), ro: document.getElementById('roll'),
             mx: document.getElementById('magX'), my: document.getElementById('magY'), mz: document.getElementById('magZ'), mt: document.getElementById('magTotal'),
             glat: document.getElementById('gpsLat'), glon: document.getElementById('gpsLon'), galt: document.getElementById('gpsAlt'), gspd: document.getElementById('gpsSpeed')
         };
@@ -235,10 +235,10 @@
             }
 
             // به‌روزرسانی UI (شتاب و ژیرو)
-            els.ax.textContent = currentData.accX.toFixed(2);
-            els.ay.textContent = currentData.accY.toFixed(2);
-            els.az.textContent = currentData.accZ.toFixed(2);
-            els.at.textContent = currentData.accTotal.toFixed(2);
+            els.ax.textContent = currentData.accX.toFixed();
+            els.ay.textContent = currentData.accY.toFixed(3);
+            els.aZ.textContent = currentData.accZ.toFixed(3);
+            els.at.textContent = currentData.accTotal.toFixed(3);
             
             els.gx.textContent = currentData.gyroX.toFixed(2);
             els.gy.textContent = currentData.gyroY.toFixed(2);
