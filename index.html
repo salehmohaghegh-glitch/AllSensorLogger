@@ -3,17 +3,13 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>ناوبری اینرسی با کالیبراسیون شتاب+ژیرو</title>
+    <title>ناوبری اینرسی با فیلتر مکمل</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Inter:wght@100..900&family=Vazirmatn:wght@100..900&display=swap');
         * { font-family: 'Vazirmatn', 'Inter', sans-serif; }
         body { background: #f3f4f6; }
         .card { background: white; border-radius: 0.75rem; padding: 1rem; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1); }
-        .badge { display: inline-block; padding: 0.2rem 0.6rem; border-radius: 9999px; font-size: 0.7rem; font-weight: bold; }
-        .badge-success { background: #d1fae5; color: #065f46; }
-        .badge-warning { background: #fef3c7; color: #92400e; }
-        .badge-danger { background: #fee2e2; color: #991b1b; }
         .value { font-family: monospace; font-size: 0.95rem; }
     </style>
 </head>
@@ -21,11 +17,10 @@
 
 <div class="w-full max-w-6xl space-y-4">
 
-    <!-- هدر -->
     <header class="bg-gradient-to-r from-indigo-800 to-purple-800 text-white p-6 rounded-2xl flex flex-wrap justify-between items-center gap-4">
         <div>
-            <h1 class="text-2xl font-bold">🧭 ناوبری اینرسی (با کالیبراسیون)</h1>
-            <p class="text-indigo-200 text-sm">شتاب‌سنج + ژیروسکوپ + حذف بایاس و جاذبه</p>
+            <h1 class="text-2xl font-bold">🧭 ناوبری اینرسی با فیلتر مکمل</h1>
+            <p class="text-indigo-200 text-sm">تلفیق شتاب‌سنج + ژیروسکوپ + مغناطیس‌سنج</p>
         </div>
         <div class="flex gap-3 flex-wrap">
             <button id="navBtn" class="px-6 py-3 bg-emerald-500 hover:bg-emerald-600 rounded-xl font-bold shadow-lg transition flex items-center gap-2">
@@ -37,44 +32,36 @@
         </div>
     </header>
 
-    <!-- وضعیت کالیبراسیون -->
-    <div class="grid grid-cols-1 md:grid-cols-5 gap-3">
-        <div class="card flex justify-between"><span class="text-gray-500">وضعیت:</span> <span id="navStatus" class="font-bold text-amber-600">آماده</span></div>
-        <div class="card flex justify-between"><span class="text-gray-500">زمان کالیبره:</span> <span id="calibTime" class="font-mono">0s</span></div>
-        <div class="card flex justify-between"><span class="text-gray-500">بایاس شتاب:</span> <span id="accBias" class="font-mono text-xs">--</span></div>
-        <div class="card flex justify-between"><span class="text-gray-500">بایاس ژایرو:</span> <span id="gyroBias" class="font-mono text-xs">--</span></div>
-        <div class="card flex justify-between"><span class="text-gray-500">نقاط:</span> <span id="pointCount" class="font-mono">0</span></div>
+    <!-- وضعیت -->
+    <div class="grid grid-cols-2 md:grid-cols-4 gap-3">
+        <div class="card"><span class="text-gray-500">وضعیت:</span> <span id="navStatus" class="font-bold text-amber-600">آماده</span></div>
+        <div class="card"><span class="text-gray-500">زاویه Pitch:</span> <span id="pitchAngle" class="value text-blue-600">0.0°</span></div>
+        <div class="card"><span class="text-gray-500">زاویه Roll:</span> <span id="rollAngle" class="value text-green-600">0.0°</span></div>
+        <div class="card"><span class="text-gray-500">زاویه Yaw:</span> <span id="yawAngle" class="value text-purple-600">0.0°</span></div>
     </div>
 
-    <!-- پنل زوایا و موقعیت -->
+    <!-- موقعیت و سرعت -->
     <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
         <div class="card">
-            <h3 class="font-bold text-gray-700 border-b pb-2 mb-2">📐 زوایای گوشی</h3>
-            <div class="grid grid-cols-3 gap-2 text-center">
-                <div><span class="text-gray-400 text-xs">Pitch</span><br><span id="pitchAngle" class="value text-blue-600">0.0°</span></div>
-                <div><span class="text-gray-400 text-xs">Roll</span><br><span id="rollAngle" class="value text-green-600">0.0°</span></div>
-                <div><span class="text-gray-400 text-xs">Yaw</span><br><span id="yawAngle" class="value text-purple-600">0.0°</span></div>
-            </div>
-        </div>
-        <div class="card">
-            <h3 class="font-bold text-gray-700 border-b pb-2 mb-2">📍 موقعیت تخمینی (متر)</h3>
+            <h3 class="font-bold text-gray-700 border-b pb-2 mb-2">📍 موقعیت (متر)</h3>
             <div class="grid grid-cols-3 gap-2 text-center">
                 <div><span class="text-gray-400 text-xs">X</span><br><span id="posX" class="value text-red-600">0.00</span></div>
                 <div><span class="text-gray-400 text-xs">Y</span><br><span id="posY" class="value text-red-600">0.00</span></div>
                 <div><span class="text-gray-400 text-xs">Z</span><br><span id="posZ" class="value text-red-600">0.00</span></div>
             </div>
         </div>
+        <div class="card">
+            <h3 class="font-bold text-gray-700 border-b pb-2 mb-2">📊 شتاب خالص و سرعت</h3>
+            <div class="grid grid-cols-2 gap-2 text-center">
+                <div><span class="text-gray-400 text-xs">شتاب X</span><br><span id="netAccX" class="value">0.00</span></div>
+                <div><span class="text-gray-400 text-xs">شتاب Y</span><br><span id="netAccY" class="value">0.00</span></div>
+                <div><span class="text-gray-400 text-xs">شتاب Z</span><br><span id="netAccZ" class="value">0.00</span></div>
+                <div><span class="text-gray-400 text-xs">سرعت (m/s)</span><br><span id="speedVal" class="value">0.00</span></div>
+            </div>
+        </div>
     </div>
 
-    <!-- شتاب تصفیه‌شده و سرعت -->
-    <div class="grid grid-cols-2 md:grid-cols-4 gap-3">
-        <div class="card"><span class="text-gray-400 text-xs">شتاب خالص X</span><br><span id="netAccX" class="value">0.00</span></div>
-        <div class="card"><span class="text-gray-400 text-xs">شتاب خالص Y</span><br><span id="netAccY" class="value">0.00</span></div>
-        <div class="card"><span class="text-gray-400 text-xs">شتاب خالص Z</span><br><span id="netAccZ" class="value">0.00</span></div>
-        <div class="card"><span class="text-gray-400 text-xs">سرعت (m/s)</span><br><span id="speedVal" class="value">0.00</span></div>
-    </div>
-
-    <!-- پیش‌نمایش لاگ -->
+    <!-- لاگ -->
     <div class="card">
         <h3 class="text-sm font-semibold text-gray-500 mb-2">📋 پیش‌نمایش لاگ</h3>
         <div id="logPreview" class="bg-gray-50 h-32 overflow-hidden relative rounded border p-2 font-mono text-[0.65rem]">
@@ -82,21 +69,56 @@
             <div id="logContent" class="relative z-10"></div>
         </div>
     </div>
-
 </div>
 
 <script type="module">
 // ================================================================
-//  کتابخانه ریاضی برداری
+//  کتابخانه برداری
 // ================================================================
 const vec = {
-    norm: (a) => Math.sqrt(a.reduce((s,v) => s + v*v, 0)),
-    scale: (a, s) => a.map(v => v * s),
-    add: (a, b) => a.map((v,i) => v + b[i]),
-    sub: (a, b) => a.map((v,i) => v - b[i]),
-    dot: (a, b) => a.reduce((s,v,i) => s + v * b[i], 0),
-    clamp: (a, min, max) => a.map(v => Math.min(Math.max(v, min), max))
+    norm: a => Math.sqrt(a.reduce((s,v) => s + v*v, 0)),
+    add: (a,b) => a.map((v,i) => v + b[i]),
+    sub: (a,b) => a.map((v,i) => v - b[i]),
+    scale: (a,s) => a.map(v => v * s),
+    clamp: (a,min,max) => a.map(v => Math.min(Math.max(v, min), max))
 };
+
+// ================================================================
+//  فیلتر مکمل (برای زوایا)
+// ================================================================
+class ComplementaryFilter {
+    constructor(alpha = 0.98, dt = 0.02) {
+        this.alpha = alpha; // ضریب وزن برای ژیروسکوپ
+        this.dt = dt;
+        this.pitch = 0;
+        this.roll = 0;
+        this.yaw = 0;
+    }
+
+    // به‌روزرسانی با داده‌های شتاب (زاویه از شتاب) و ژیروسکوپ (نرخ زاویه) و مغناطیس (yaw)
+    update(accPitch, accRoll, gyroRates, magYaw = null) {
+        // یکپارچه‌سازی ژیروسکوپ
+        const gyroPitch = this.pitch + gyroRates[0] * this.dt;
+        const gyroRoll = this.roll + gyroRates[1] * this.dt;
+        let gyroYaw = this.yaw + gyroRates[2] * this.dt;
+
+        // فیلتر مکمل برای Pitch و Roll
+        this.pitch = this.alpha * gyroPitch + (1 - this.alpha) * accPitch;
+        this.roll = this.alpha * gyroRoll + (1 - this.alpha) * accRoll;
+
+        // برای Yaw، اگر مغناطیس در دسترس باشد، از آن استفاده می‌کنیم
+        if (magYaw !== null) {
+            // نرمال‌سازی اختلاف زاویه
+            let diff = magYaw - gyroYaw;
+            diff = Math.atan2(Math.sin(diff), Math.cos(diff)); // محدوده [-pi, pi]
+            this.yaw = gyroYaw + (1 - this.alpha) * diff;
+        } else {
+            this.yaw = gyroYaw;
+        }
+
+        return { pitch: this.pitch, roll: this.roll, yaw: this.yaw };
+    }
+}
 
 // ================================================================
 //  وضعیت کلی
@@ -107,35 +129,38 @@ const state = {
     calibStartTime: 0,
     calibDuration: 5, // ثانیه
 
-    // بایاس‌های محاسبه‌شده
-    accBias: [0, 0, 0],   // شتاب در حالت سکون
-    gyroBias: [0, 0, 0],  // ژیروسکوپ در حالت سکون
-
-    // بافر نمونه‌ها برای کالیبراسیون
+    // بایاس‌ها
+    accBias: [0, 0, 0],
+    gyroBias: [0, 0, 0],
     accSamples: [],
     gyroSamples: [],
 
     // داده‌های ناوبری
     pos: [0, 0, 0],
     vel: [0, 0, 0],
-    orientation: [0, 0, 0], // Pitch, Roll, Yaw (رادیان)
 
-    // داده‌های لحظه‌ای
+    // فیلتر مکمل
+    filter: new ComplementaryFilter(0.98, 0.02),
+
+    // داده‌های خام و پردازش‌شده
     rawAcc: [0, 0, 0],
     rawGyro: [0, 0, 0],
+    rawMag: [0, 0, 0],
     gravity: [0, 0, 0],
-    netAcc: [0, 0, 0],     // پس از حذف جاذبه و بایاس
+    netAcc: [0, 0, 0],      // شتاب خالص (بدون جاذبه) در دستگاه
 
-    // فیلتر پایین‌گذر برای شتاب
+    // فیلتر پایین‌گذر روی شتاب
     filteredAcc: [0, 0, 0],
-    alpha: 0.2, // ضریب فیلتر (هرچه کمتر، نویز کمتر)
+    alphaLP: 0.15,           // ضریب فیلتر پایین‌گذر
 
-    // آستانه تشخیص حرکت (برای جلوگیری از دریفت در سکون)
-    motionThreshold: 0.05, // m/s²
+    // آستانه حرکت (برای جلوگیری از دریفت)
+    motionThreshold: 0.08,   // m/s²
+    isMoving: false,
 
     // آمار
     pointCount: 0,
-    lastTimestamp: 0
+    lastTimestamp: 0,
+    magInitialized: false
 };
 
 // ================================================================
@@ -146,10 +171,6 @@ const el = {
     navBtn: $('navBtn'),
     resetBtn: $('resetBtn'),
     navStatus: $('navStatus'),
-    calibTime: $('calibTime'),
-    accBias: $('accBias'),
-    gyroBias: $('gyroBias'),
-    pointCount: $('pointCount'),
     pitchAngle: $('pitchAngle'),
     rollAngle: $('rollAngle'),
     yawAngle: $('yawAngle'),
@@ -160,25 +181,22 @@ const el = {
 };
 
 // ================================================================
-//  توابع محاسباتی
+//  توابع کمکی
 // ================================================================
-
-// 1. محاسبه Pitch و Roll از شتاب (با فرض ایستایی)
 function calcTiltFromAcc(acc) {
+    // محاسبه Pitch و Roll از شتاب (در حالت سکون یا حرکت کم)
     const [ax, ay, az] = acc;
     const pitch = Math.atan2(ay, Math.sqrt(ax*ax + az*az));
     const roll = Math.atan2(-ax, az);
     return { pitch, roll };
 }
 
-// 2. تخمین بردار جاذبه در دستگاه
 function gravityVector(pitch, roll) {
     const cp = Math.cos(pitch), sp = Math.sin(pitch);
     const cr = Math.cos(roll), sr = Math.sin(roll);
     return [ -sp, sr * cp, cr * cp ];
 }
 
-// 3. تبدیل شتاب از دستگاه به جهان (ZYX)
 function accToWorld(acc, pitch, roll, yaw) {
     const cp = Math.cos(pitch), sp = Math.sin(pitch);
     const cr = Math.cos(roll), sr = Math.sin(roll);
@@ -195,21 +213,6 @@ function accToWorld(acc, pitch, roll, yaw) {
     ];
 }
 
-// 4. انتگرال‌گیری (با اعمال آستانه حرکت)
-function integrate(pos, vel, accWorld, dt, threshold) {
-    const accMag = vec.norm(accWorld);
-    let effectiveAcc = accWorld;
-    // اگر شتاب کمتر از آستانه باشد، آن را صفر در نظر بگیر (جلوگیری از دریفت)
-    if (accMag < threshold) {
-        effectiveAcc = [0, 0, 0];
-        // همچنین سرعت را به‌آرامی به سمت صفر ببریم (میرایی)
-        vel = vel.map(v => v * 0.95);
-    }
-    const newVel = vel.map((v, i) => v + effectiveAcc[i] * dt);
-    const newPos = pos.map((p, i) => p + vel[i] * dt + 0.5 * effectiveAcc[i] * dt * dt);
-    return { pos: newPos, vel: newVel };
-}
-
 // ================================================================
 //  مدیریت سنسورها
 // ================================================================
@@ -223,105 +226,114 @@ function handleMotion(event) {
     const acc = event.accelerationIncludingGravity || { x:0, y:0, z:0 };
     const rot = event.rotationRate || { alpha:0, beta:0, gamma:0 };
 
-    // داده‌های خام
     state.rawAcc = [acc.x || 0, acc.y || 0, acc.z || 0];
     state.rawGyro = [rot.beta || 0, rot.gamma || 0, rot.alpha || 0];
 
-    // --- اگر در حال کالیبراسیون هستیم، نمونه‌ها را جمع‌آوری کن ---
+    // کالیبراسیون
     if (state.isCalibrating) {
         state.accSamples.push([...state.rawAcc]);
         state.gyroSamples.push([...state.rawGyro]);
         const elapsed = now - state.calibStartTime;
-        el.calibTime.textContent = elapsed.toFixed(1) + 's';
         if (elapsed >= state.calibDuration) {
             finishCalibration();
         }
-        return; // در حین کالیبراسیون، ناوبری انجام نمی‌شود
+        return;
     }
 
-    // --- اگر کالیبره شده و ناوبری فعال است ---
-    if (state.isNavigating) {
-        // ۱. تصحیح بایاس شتاب و ژیروسکوپ
-        const accCorrected = state.rawAcc.map((v, i) => v - state.accBias[i]);
-        const gyroCorrected = state.rawGyro.map((v, i) => v - state.gyroBias[i]);
+    if (!state.isNavigating) return;
 
-        // ۲. فیلتر پایین‌گذر روی شتاب (کاهش نویز)
-        state.filteredAcc = state.filteredAcc.map((v, i) => 
-            state.alpha * accCorrected[i] + (1 - state.alpha) * v
-        );
+    // ۱. تصحیح بایاس
+    const accCorrected = state.rawAcc.map((v, i) => v - state.accBias[i]);
+    const gyroCorrected = state.rawGyro.map((v, i) => v - state.gyroBias[i]);
 
-        // ۳. محاسبه زوایا از شتاب فیلترشده
-        const tilt = calcTiltFromAcc(state.filteredAcc);
-        const pitch = tilt.pitch;
-        const roll = tilt.roll;
+    // ۲. فیلتر پایین‌گذر روی شتاب
+    state.filteredAcc = state.filteredAcc.map((v, i) =>
+        state.alphaLP * accCorrected[i] + (1 - state.alphaLP) * v
+    );
 
-        // ۴. تخمین جاذبه و حذف آن
-        const grav = gravityVector(pitch, roll);
-        state.gravity = grav;
-        state.netAcc = vec.sub(state.filteredAcc, grav);
+    // ۳. محاسبه زوایای شتاب (Pitch, Roll) از شتاب فیلترشده
+    const tilt = calcTiltFromAcc(state.filteredAcc);
+    const accPitch = tilt.pitch;
+    const accRoll = tilt.roll;
 
-        // ۵. به‌روزرسانی Yaw با ژیروسکوپ تصحیح‌شده
-        const yawRate = gyroCorrected[2] * Math.PI / 180;
-        state.orientation[2] += yawRate * dt;
-
-        // ذخیره Pitch و Roll برای نمایش
-        state.orientation[0] = pitch;
-        state.orientation[1] = roll;
-
-        // ۶. تبدیل شتاب خالص به دستگاه جهانی
-        const accWorld = accToWorld(state.netAcc, pitch, roll, state.orientation[2]);
-
-        // ۷. انتگرال‌گیری با آستانه حرکت
-        const result = integrate(state.pos, state.vel, accWorld, dt, state.motionThreshold);
-        state.pos = result.pos;
-        state.vel = result.vel;
-
-        // ۸. محدود کردن سرعت برای جلوگیری از انفجار عددی
-        state.vel = vec.clamp(state.vel, -10, 10);
-
-        state.pointCount++;
+    // ۴. به‌روزرسانی فیلتر مکمل با ژیروسکوپ (نرخ‌ها به رادیان بر ثانیه)
+    const gyroRates = gyroCorrected.map(v => v * Math.PI / 180);
+    // برای Yaw از مغناطیس‌سنج استفاده می‌کنیم (اگر مقداردهی شده باشد)
+    let magYaw = null;
+    if (state.magInitialized) {
+        // محاسبه Yaw از مغناطیس: در حالت ایده‌آل باید با استفاده از ماتریس چرخش محاسبه شود
+        // ولی برای سادگی از همان azimuth استفاده می‌کنیم (با فرض اینکه گوشی افقی است)
+        // در عمل باید زاویه Magnetic Declination را هم تصحیح کرد
+        const magX = state.rawMag[0], magY = state.rawMag[1];
+        if (magX !== 0 || magY !== 0) {
+            magYaw = Math.atan2(magY, magX);
+        }
     }
 
-    // --- به‌روزرسانی UI ---
+    // به‌روزرسانی فیلتر
+    const angles = state.filter.update(accPitch, accRoll, gyroRates, magYaw);
+    const pitch = angles.pitch;
+    const roll = angles.roll;
+    const yaw = angles.yaw;
+
+    // ذخیره زوایا در state برای نمایش
+    state.pitch = pitch;
+    state.roll = roll;
+    state.yaw = yaw;
+
+    // ۵. تخمین جاذبه و حذف آن
+    const grav = gravityVector(pitch, roll);
+    state.gravity = grav;
+    state.netAcc = vec.sub(state.filteredAcc, grav);
+
+    // ۶. تشخیص حرکت بر اساس اندازه شتاب خالص
+    const accMag = vec.norm(state.netAcc);
+    state.isMoving = accMag > state.motionThreshold;
+
+    // ۷. تبدیل به دستگاه جهانی
+    const accWorld = accToWorld(state.netAcc, pitch, roll, yaw);
+
+    // ۸. انتگرال‌گیری با شرط حرکت
+    if (state.isMoving) {
+        const newVel = state.vel.map((v, i) => v + accWorld[i] * dt);
+        const newPos = state.pos.map((p, i) => p + state.vel[i] * dt + 0.5 * accWorld[i] * dt * dt);
+        state.vel = newVel;
+        state.pos = newPos;
+    } else {
+        // در حالت سکون، سرعت را میرا کن
+        state.vel = state.vel.map(v => v * 0.9);
+        // موقعیت را ثابت نگه دار
+    }
+
+    // ۹. محدود کردن سرعت
+    state.vel = vec.clamp(state.vel, -5, 5);
+
+    state.pointCount++;
     updateUI();
 }
 
 // ================================================================
-//  به‌روزرسانی نمایشگر
+//  مدیریت مغناطیس‌سنج
 // ================================================================
-function updateUI() {
-    const pitch = state.orientation[0];
-    const roll = state.orientation[1];
-    const yaw = state.orientation[2];
-
-    el.pitchAngle.textContent = (pitch * 180 / Math.PI).toFixed(1) + '°';
-    el.rollAngle.textContent = (roll * 180 / Math.PI).toFixed(1) + '°';
-    el.yawAngle.textContent = (yaw * 180 / Math.PI).toFixed(1) + '°';
-
-    el.posX.textContent = state.pos[0].toFixed(2);
-    el.posY.textContent = state.pos[1].toFixed(2);
-    el.posZ.textContent = state.pos[2].toFixed(2);
-
-    el.netAccX.textContent = state.netAcc[0].toFixed(2);
-    el.netAccY.textContent = state.netAcc[1].toFixed(2);
-    el.netAccZ.textContent = state.netAcc[2].toFixed(2);
-    el.speedVal.textContent = vec.norm(state.vel).toFixed(2);
-
-    el.pointCount.textContent = state.pointCount;
-
-    // لاگ (هر ۵ نقطه)
-    if (state.pointCount % 5 === 0 && state.isNavigating) {
-        const time = new Date().toLocaleTimeString();
-        const div = document.createElement('div');
-        div.className = 'log-entry';
-        div.textContent = `${time} | Pos: ${state.pos.map(v=>v.toFixed(1)).join(', ')} | Spd: ${vec.norm(state.vel).toFixed(1)}`;
-        el.logContent.insertBefore(div, el.logContent.firstChild);
-        if (el.logContent.children.length > 8) el.logContent.removeChild(el.logContent.lastChild);
+function initMagnetometer() {
+    if (!('Magnetometer' in window)) {
+        console.warn('Magnetometer not supported');
+        return;
+    }
+    try {
+        const mag = new Magnetometer({ frequency: 10 });
+        mag.addEventListener('reading', () => {
+            state.rawMag = [mag.x, mag.y, mag.z];
+            state.magInitialized = true;
+        });
+        mag.start();
+    } catch (e) {
+        console.warn('Magnetometer init error:', e);
     }
 }
 
 // ================================================================
-//  کالیبراسیون کامل (شتاب + ژیرو)
+//  کالیبراسیون
 // ================================================================
 function startCalibration() {
     if (state.isNavigating) return;
@@ -338,25 +350,27 @@ function finishCalibration() {
     state.isCalibrating = false;
     el.navBtn.disabled = false;
 
-    // محاسبه میانگین بایاس شتاب
     if (state.accSamples.length === 0) {
-        el.navStatus.textContent = '❌ خطا در کالیبره شتاب';
+        el.navStatus.textContent = '❌ خطا در کالیبره';
         return;
     }
+
     const accSum = state.accSamples.reduce((acc, s) => acc.map((v, i) => v + s[i]), [0,0,0]);
     state.accBias = accSum.map(v => v / state.accSamples.length);
 
-    // محاسبه میانگین بایاس ژیروسکوپ
     const gyroSum = state.gyroSamples.reduce((acc, s) => acc.map((v, i) => v + s[i]), [0,0,0]);
     state.gyroBias = gyroSum.map(v => v / state.gyroSamples.length);
-
-    el.accBias.textContent = state.accBias.map(v => v.toFixed(3)).join(', ');
-    el.gyroBias.textContent = state.gyroBias.map(v => v.toFixed(3)).join(', ');
 
     el.navStatus.textContent = '✅ کالیبره شد';
     el.navStatus.className = 'font-bold text-green-600';
 
-    // شروع خودکار ناوبری
+    // مقداردهی اولیه فیلتر
+    const tilt = calcTiltFromAcc(state.accBias);
+    state.filter.pitch = tilt.pitch;
+    state.filter.roll = tilt.roll;
+    state.filter.yaw = 0; // می‌توان از مغناطیس برای مقداردهی استفاده کرد
+
+    // شروع ناوبری
     startNavigation();
 }
 
@@ -368,7 +382,6 @@ function startNavigation() {
     state.isNavigating = true;
     state.pos = [0, 0, 0];
     state.vel = [0, 0, 0];
-    state.orientation = [0, 0, 0];
     state.pointCount = 0;
     state.filteredAcc = [0, 0, 0];
     el.navStatus.textContent = '🚀 ناوبری فعال';
@@ -376,6 +389,8 @@ function startNavigation() {
     el.navBtn.textContent = '⏹ توقف';
     el.navBtn.className = 'px-6 py-3 bg-rose-600 hover:bg-rose-700 rounded-xl font-bold shadow-lg transition text-white';
     el.logContent.innerHTML = '';
+    // راه‌اندازی مگنتومتر
+    initMagnetometer();
 }
 
 function stopNavigation() {
@@ -390,34 +405,66 @@ function resetAll() {
     stopNavigation();
     state.pos = [0, 0, 0];
     state.vel = [0, 0, 0];
-    state.orientation = [0, 0, 0];
     state.pointCount = 0;
     state.accBias = [0, 0, 0];
     state.gyroBias = [0, 0, 0];
+    state.filter.pitch = 0;
+    state.filter.roll = 0;
+    state.filter.yaw = 0;
     state.filteredAcc = [0, 0, 0];
-    el.accBias.textContent = '--';
-    el.gyroBias.textContent = '--';
+    state.magInitialized = false;
+    state.rawMag = [0, 0, 0];
     el.navStatus.textContent = '🔄 ریست شد';
     el.navStatus.className = 'font-bold text-gray-600';
-    el.calibTime.textContent = '0s';
     el.logContent.innerHTML = '';
     updateUI();
 }
 
 // ================================================================
+//  به‌روزرسانی UI
+// ================================================================
+function updateUI() {
+    const pitch = state.filter.pitch || 0;
+    const roll = state.filter.roll || 0;
+    const yaw = state.filter.yaw || 0;
+
+    el.pitchAngle.textContent = (pitch * 180 / Math.PI).toFixed(1) + '°';
+    el.rollAngle.textContent = (roll * 180 / Math.PI).toFixed(1) + '°';
+    el.yawAngle.textContent = (yaw * 180 / Math.PI).toFixed(1) + '°';
+
+    el.posX.textContent = state.pos[0].toFixed(2);
+    el.posY.textContent = state.pos[1].toFixed(2);
+    el.posZ.textContent = state.pos[2].toFixed(2);
+
+    el.netAccX.textContent = state.netAcc[0]?.toFixed(2) || '0.00';
+    el.netAccY.textContent = state.netAcc[1]?.toFixed(2) || '0.00';
+    el.netAccZ.textContent = state.netAcc[2]?.toFixed(2) || '0.00';
+    el.speedVal.textContent = vec.norm(state.vel).toFixed(2);
+
+    // لاگ
+    if (state.pointCount % 5 === 0 && state.isNavigating) {
+        const time = new Date().toLocaleTimeString();
+        const div = document.createElement('div');
+        div.className = 'log-entry';
+        div.textContent = `${time} | Pos: ${state.pos.map(v=>v.toFixed(1)).join(', ')} | Spd: ${vec.norm(state.vel).toFixed(1)}`;
+        el.logContent.insertBefore(div, el.logContent.firstChild);
+        if (el.logContent.children.length > 8) el.logContent.removeChild(el.logContent.lastChild);
+    }
+}
+
+// ================================================================
 //  رویداد دکمه‌ها
 // ================================================================
-el.navBtn.addEventListener('click', async () => {
+el.navBtn.addEventListener('click', () => {
     if (state.isNavigating) {
         stopNavigation();
         return;
     }
-    // اگر قبلاً کالیبره شده (بایاس غیرصفر) و ناوبری متوقف است، مستقیم شروع کن
+    // اگر قبلاً کالیبره شده، مستقیم شروع کن
     if (state.accBias.some(v => v !== 0) && state.gyroBias.some(v => v !== 0)) {
         startNavigation();
         return;
     }
-    // در غیر این صورت، کالیبره کن
     startCalibration();
 });
 
@@ -428,14 +475,16 @@ el.resetBtn.addEventListener('click', resetAll);
 // ================================================================
 window.addEventListener('devicemotion', handleMotion);
 window.addEventListener('deviceorientation', (event) => {
-    // فقط برای مقداردهی اولیه Yaw (در صورت نیاز)
-    if (event.alpha !== null && state.pointCount === 0 && !state.isNavigating) {
-        // می‌توانیم Yaw اولیه را از قطبنما بگیریم (اختیاری)
-        // state.orientation[2] = event.alpha * Math.PI / 180;
+    // برای مقداردهی اولیه Yaw با مغناطیس (در صورت عدم دسترسی به Magnetometer API)
+    if (event.alpha !== null && !state.magInitialized) {
+        // تبدیل به رادیان
+        const alphaRad = event.alpha * Math.PI / 180;
+        // فرض می‌کنیم گوشی افقی است و مغناطیس در دسترس نیست
+        // فقط برای نمایش
     }
 });
 
-console.log('🧭 ناوبری با کالیبراسیون شتاب+ژیرو آماده است.');
+console.log('🧭 ناوبری با فیلتر مکمل آماده است.');
 </script>
 </body>
 </html>
