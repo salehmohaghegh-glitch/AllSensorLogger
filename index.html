@@ -90,10 +90,10 @@
             <!-- 1. شتاب خطی -->
             <div class="sensor-card">
                 <h3 class="sensor-title">شتاب (m/s²)</h3>
-                <div class="grid grid-cols-1 gap-1 text-center">
-                    <div class="flex justify-between" dir="ltr"><span class="val-label">X</span> <span id="accelX" class="val-data">--</span></div>
-                    <div class="flex justify-between" dir="ltr"><span class="val-label">Y</span> <span id="accelY" class="val-data">--</span></div>
-                    <div class="flex justify-between" dir="ltr"><span class="val-label">Z</span> <span id="accelZ" class="val-data">--</span></div>
+                <div class="grid grid-cols-1 gap-1 text-center" dir="ltr">
+                    <div class="flex justify-between"><span class="val-label">X</span> <span id="accelX" class="val-data">--</span></div>
+                    <div class="flex justify-between"><span class="val-label">Y</span> <span id="accelY" class="val-data">--</span></div>
+                    <div class="flex justify-between"><span class="val-label">Z</span> <span id="accelZ" class="val-data">--</span></div>
                     <div class="flex justify-between border-t mt-1 pt-1" dir="ltr><span class="val-label text-indigo-500">Total</span> <span id="accelTotal" class="val-data font-bold">--</span></div>
                 </div>
             </div>
@@ -101,30 +101,30 @@
             <!-- 2. سرعت زاویه‌ای (Gyro) -->
             <div class="sensor-card">
                 <h3 class="sensor-title">سرعت زاویه‌ای (deg/s)</h3>
-                <div class="grid grid-cols-1 gap-1 text-center">
-                    <div class="flex justify-between" dir="ltr"><span class="val-label">X (Roll)</span> <span id="gyroX" class="val-data" >--</span></div>
-                    <div class="flex justify-between" dir="ltr"><span class="val-label">Y (Pitch)</span> <span id="gyroY" class="val-data">--</span></div>
-                    <div class="flex justify-between" dir="ltr"><span class="val-label">Z (Yaw)</span> <span id="gyroZ" class="val-data">--</span></div>
+                <div class="grid grid-cols-1 gap-1 text-center" dir="ltr">
+                    <div class="flex justify-between"><span class="val-label">X (Roll)</span> <span id="gyroX" class="val-data" >--</span></div>
+                    <div class="flex justify-between"><span class="val-label">Y (Pitch)</span> <span id="gyroY" class="val-data">--</span></div>
+                    <div class="flex justify-between"><span class="val-label">Z (Yaw)</span> <span id="gyroZ" class="val-data">--</span></div>
                 </div>
             </div>
 
             <!-- 3. جهت‌گیری (Orientation) -->
             <div class="sensor-card">
                 <h3 class="sensor-title">جهت‌گیری (درجه)</h3>
-                <div class="grid grid-cols-1 gap-1 text-center">
-                    <div class="flex justify-between" dir="ltr"><span class="val-label">Azimuth</span> <span id="azimuthDisplay" class="val-data">--</span></div>
-                    <div class="flex justify-between" dir="ltr"><span class="val-label">Pitch</span> <span id="pitchDisplay" class="val-data">--</span></div>
-                    <div class="flex justify-between" dir="ltr"><span class="val-label">Roll</span> <span id="rollDisplay" class="val-data">--</span></div>
+                <div class="grid grid-cols-1 gap-1 text-center"  dir="ltr">
+                    <div class="flex justify-between"><span class="val-label">Azimuth</span> <span id="azimuthDisplay" class="val-data">--</span></div>
+                    <div class="flex justify-between"><span class="val-label">Pitch</span> <span id="pitchDisplay" class="val-data">--</span></div>
+                    <div class="flex justify-between"><span class="val-label">Roll</span> <span id="rollDisplay" class="val-data">--</span></div>
                 </div>
             </div>
 
             <!-- 4. میدان مغناطیسی (Magnetometer) -->
             <div class="sensor-card">
                 <h3 class="sensor-title">مگنتومتر (µT)</h3>
-                <div class="grid grid-cols-1 gap-1 text-center">
-                    <div class="flex justify-between" dir="ltr"><span class="val-label">X</span> <span id="magX" class="val-data">--</span></div>
-                    <div class="flex justify-between" dir="ltr"><span class="val-label">Y</span> <span id="magY" class="val-data">--</span></div>
-                    <div class="flex justify-between" dir="ltr"><span class="val-label">Z</span> <span id="magZ" class="val-data">--</span></div>
+                <div class="grid grid-cols-1 gap-1 text-center" dir="ltr">
+                    <div class="flex justify-between"><span class="val-label">X</span> <span id="magX" class="val-data">--</span></div>
+                    <div class="flex justify-between"><span class="val-label">Y</span> <span id="magY" class="val-data">--</span></div>
+                    <div class="flex justify-between"><span class="val-label">Z</span> <span id="magZ" class="val-data">--</span></div>
                     <div class="flex justify-between border-t mt-1 pt-1"><span class="val-label text-indigo-500">Total</span> <span id="magTotal" class="val-data font-bold">--</span></div>
                 </div>
                 <div id="magStatus" class="text-[0.6rem] text-red-400 mt-1 text-center hidden">پشتیبانی نمی‌شود</div>
@@ -133,11 +133,11 @@
             <!-- 5. GPS -->
             <div class="sensor-card">
                 <h3 class="sensor-title">GPS</h3>
-                <div class="grid grid-cols-1 gap-1 text-center text-xs">
-                    <div class="flex justify-between" dir="ltr"><span class="val-label">Lat</span> <span id="gpsLat" class="val-data">--</span></div>
-                    <div class="flex justify-between" dir="ltr"><span class="val-label">Lon</span> <span id="gpsLon" class="val-data">--</span></div>
-                    <div class="flex justify-between" dir="ltr"><span class="val-label">Alt</span> <span id="gpsAlt" class="val-data">--</span></div>
-                    <div class="flex justify-between" dir="ltr"><span class="val-label">Spd</span> <span id="gpsSpeed" class="val-data">--</span></div>
+                <div class="grid grid-cols-1 gap-1 text-center text-xs"  dir="ltr">
+                    <div class="flex justify-between"><span class="val-label">Lat</span> <span id="gpsLat" class="val-data">--</span></div>
+                    <div class="flex justify-between"><span class="val-label">Lon</span> <span id="gpsLon" class="val-data">--</span></div>
+                    <div class="flex justify-between"><span class="val-label">Alt</span> <span id="gpsAlt" class="val-data">--</span></div>
+                    <div class="flex justify-between"><span class="val-label">Spd</span> <span id="gpsSpeed" class="val-data">--</span></div>
                 </div>
             </div>
         </div>
@@ -270,9 +270,9 @@
             els.accZ.textContent = currentData.accZ.toFixed(3);
             els.accTotal.textContent = currentData.accTotal.toFixed(3);
 
-            els.gyroX.textContent = currentData.gyroX.toFixed(3);
-            els.gyroY.textContent = currentData.gyroY.toFixed(3);
-            els.gyroZ.textContent = currentData.gyroZ.toFixed(3);
+            els.gyroX.textContent = currentData.gyroX.toFixed(2);
+            els.gyroY.textContent = currentData.gyroY.toFixed(2);
+            els.gyroZ.textContent = currentData.gyroZ.toFixed(2);
 
             if (isRecording) recordDataPoint();
         }
