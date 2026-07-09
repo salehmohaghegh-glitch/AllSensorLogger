@@ -265,14 +265,14 @@
             currentData.gyroZ = rot.alpha || 0;
 
             // به‌روزرسانی UI
-            els.accX.textContent = currentData.accX.toFixed(2);
-            els.accY.textContent = currentData.accY.toFixed(2);
-            els.accZ.textContent = currentData.accZ.toFixed(2);
-            els.accTotal.textContent = currentData.accTotal.toFixed(2);
+            els.accX.textContent = currentData.accX.toFixed(3);
+            els.accY.textContent = currentData.accY.toFixed(3);
+            els.accZ.textContent = currentData.accZ.toFixed(3);
+            els.accTotal.textContent = currentData.accTotal.toFixed(3);
 
-            els.gyroX.textContent = currentData.gyroX.toFixed(2);
-            els.gyroY.textContent = currentData.gyroY.toFixed(2);
-            els.gyroZ.textContent = currentData.gyroZ.toFixed(2);
+            els.gyroX.textContent = currentData.gyroX.toFixed(3);
+            els.gyroY.textContent = currentData.gyroY.toFixed(3);
+            els.gyroZ.textContent = currentData.gyroZ.toFixed(3);
 
             if (isRecording) recordDataPoint();
         }
