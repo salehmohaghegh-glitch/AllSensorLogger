@@ -264,36 +264,60 @@
         }
 
         // 3. راه‌اندازی مگنتومتر (API جدید - ممکن است کار نکند)
-        function initMagnetometer() {
-            if ('Magnetometer' in window) {
-                try {
-                    // فرکانس حدود 10 هرتز
-                    magSensor = new Magnetometer({ frequency: 10 });
-                    magSensor.addEventListener('reading', () => {
-                        currentData.magX = magSensor.x;
-                        currentData.magY = magSensor.y;
-                        currentData.magZ = magSensor.z;
-                        // محاسبه شدت کل میدان
-                        currentData.magTotal = Math.sqrt(magSensor.x**2 + magSensor.y**2 + magSensor.z**2);
-                        
-                        // UI
-                        els.mx.textContent = magSensor.x.toFixed(1);
-                        els.my.textContent = magSensor.y.toFixed(1);
-                        els.mz.textContent = magSensor.z.toFixed(1);
-                        els.mt.textContent = currentData.magTotal.toFixed(1);
-                    });
-                    magSensor.addEventListener('error', (event) => {
-                        console.warn("Magnetometer error:", event.error.name, event.error.message);
+        // --- راه‌اندازی مگنتومتر با مدیریت خطای پیشرفته ---
+        async function initMagnetometer() {
+            // ابتدا بررسی کنیم که آیا API وجود دارد
+            if (!('Magnetometer' in window)) {
+                els.magStatus.classList.remove('hidden');
+                els.magStatus.textContent = '❌ مرورگر پشتیبانی نمی‌کند';
+                return;
+            }
+        
+            try {
+                // (اختیاری) بررسی مجوز
+                if (navigator.permissions && navigator.permissions.query) {
+                    const perm = await navigator.permissions.query({ name: 'magnetometer' });
+                    if (perm.state === 'denied') {
                         els.magStatus.classList.remove('hidden');
-                        els.magStatus.textContent = "خطا/عدم مجوز";
-                    });
-                    magSensor.start();
-                } catch (error) {
-                    console.error("Magnetometer not supported/allowed", error);
-                    els.magStatus.classList.remove('hidden');
+                        els.magStatus.textContent = '⛔ مجوز رد شد';
+                        return;
+                    }
                 }
-            } else {
-                els.magStatus.classList.remove('hidden'); // نمایش پیام عدم پشتیبانی
+        
+                // ساخت نمونه سنسور
+                magSensor = new Magnetometer({ frequency: 10 });
+                
+                magSensor.addEventListener('reading', () => {
+                    // به‌روزرسانی داده‌ها
+                    currentData.magX = magSensor.x;
+                    currentData.magY = magSensor.y;
+                    currentData.magZ = magSensor.z;
+                    currentData.magTotal = Math.sqrt(magSensor.x**2 + magSensor.y**2 + magSensor.z**2);
+                    
+                    // UI
+                    els.mx.textContent = magSensor.x.toFixed(1);
+                    els.my.textContent = magSensor.y.toFixed(1);
+                    els.mz.textContent = magSensor.z.toFixed(1);
+                    els.mt.textContent = currentData.magTotal.toFixed(1);
+                    
+                    // حذف پیام خطا در صورت موفقیت
+                    els.magStatus.classList.add('hidden');
+                });
+        
+                magSensor.addEventListener('error', (event) => {
+                    console.error('Magnetometer error:', event.error);
+                    els.magStatus.classList.remove('hidden');
+                    els.magStatus.textContent = `⚠️ خطا: ${event.error.message || 'ناشناخته'}`;
+                });
+        
+                // شروع کار
+                magSensor.start();
+                console.log('Magnetometer started successfully.');
+                
+            } catch (error) {
+                console.error('Magnetometer init error:', error);
+                els.magStatus.classList.remove('hidden');
+                els.magStatus.textContent = `❌ راه‌اندازی نشد: ${error.message}`;
             }
         }
 
