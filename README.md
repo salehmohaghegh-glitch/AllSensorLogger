@@ -47,7 +47,7 @@
 ## 🚀 اجرا | Live Demo
 
 **آدرس صفحات گیت‌هاب (پس از انتشار):**  
-👉 [https://your-username.github.io/sensor-logger/](https://your-username.github.io/sensor-logger/)
+👉 [[https://salehmohaghegh-glitch.github.io/sensor-logger/](https://github.com/salehmohaghegh-glitch/AllSensorLogger)]([https://salehmohaghegh-glitch.github.io/sensor-logger/](https://github.com/salehmohaghegh-glitch/AllSensorLogger))
 
 ---
 
