@@ -3,512 +3,441 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>لاگ‌بردار جامع سنسورها (نسخه پیشرفته)</title>
-    <!-- بارگذاری Tailwind CSS -->
+    <title>ناوبری اینرسی با سنسورهای گوشی</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Inter:wght@100..900&family=Vazirmatn:wght@100..900&display=swap');
-        body {
-            font-family: 'Vazirmatn', 'Inter', sans-serif;
-            background-color: #f3f4f6;
-        }
-        .log-entry {
-            border-bottom: 1px solid #e5e7eb;
-            padding: 6px 0;
-            font-size: 0.70rem;
-            color: #4b5563;
-            white-space: nowrap;
-            overflow: hidden;
-            text-overflow: ellipsis;
-        }
-        .toggle-btn {
-            transition: all 0.3s ease;
-        }
-        .toggle-btn:active {
-            transform: scale(0.95);
-        }
-        .sensor-card {
-            background: white;
-            border: 1px solid #e5e7eb;
-            border-radius: 0.5rem;
-            padding: 1rem;
-            box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
-        }
-        .sensor-title {
-            font-weight: 700;
-            color: #374151;
-            margin-bottom: 0.5rem;
-            border-bottom: 1px solid #f3f4f6;
-            padding-bottom: 0.25rem;
-            font-size: 0.9rem;
-        }
-        .val-label {
-            font-size: 0.7rem;
-            color: #9ca3af;
-        }
-        .val-data {
-            font-family: monospace;
-            font-size: 0.9rem;
-            color: #111827;
-        }
+        * { font-family: 'Vazirmatn', 'Inter', sans-serif; }
+        body { background: #f3f4f6; }
+        .card { background: white; border-radius: 0.75rem; padding: 1rem; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1); }
+        .badge { display: inline-block; padding: 0.2rem 0.6rem; border-radius: 9999px; font-size: 0.7rem; font-weight: bold; }
+        .badge-success { background: #d1fae5; color: #065f46; }
+        .badge-warning { background: #fef3c7; color: #92400e; }
+        .badge-danger { background: #fee2e2; color: #991b1b; }
+        .value { font-family: monospace; font-size: 0.95rem; }
     </style>
 </head>
 <body class="p-4 md:p-8 min-h-screen flex flex-col items-center">
 
-    <div class="w-full max-w-6xl bg-white shadow-xl rounded-2xl overflow-hidden">
-        
-        <!-- هدر -->
-        <header class="p-6 bg-gradient-to-r from-indigo-800 to-purple-800 text-white flex flex-col md:flex-row justify-between items-center gap-4">
-            <div>
-                <h1 class="text-2xl font-bold">لاگ‌بردار جامع سنسورها</h1>
-                <p class="text-indigo-200 text-sm mt-1">شتاب، ژیروسکوپ، مگنتومتر، GPS و زوایا</p>
-            </div>
-            <div class="flex gap-3">
-                <button id="toggleButton" class="toggle-btn px-6 py-3 bg-emerald-500 hover:bg-emerald-600 rounded-xl font-bold shadow-lg transition flex items-center gap-2">
-                    <span id="btnIcon">▶</span>
-                    <span id="btnText">شروع ضبط</span>
-                </button>
-                <button id="downloadBtn" class="toggle-btn px-6 py-3 bg-gray-500 cursor-not-allowed rounded-xl font-bold shadow-lg transition flex items-center gap-2" disabled>
-                    <span>⬇</span>
-                    <span>دانلود CSV</span>
-                </button>
-            </div>
-        </header>
+<div class="w-full max-w-6xl space-y-4">
 
-        <!-- وضعیت کلی -->
-        <div class="bg-indigo-50 px-6 py-3 border-b border-indigo-100 flex justify-between items-center text-sm">
-            <div>
-                <span class="text-gray-500">رکوردها:</span>
-                <span id="recordCount" class="font-bold text-indigo-700 text-lg mr-1">0</span>
-            </div>
-            <div id="wakeLockStatus" class="px-2 py-1 rounded bg-gray-200 text-gray-500 text-xs">WakeLock: غیرفعال</div>
+    <!-- هدر -->
+    <header class="bg-gradient-to-r from-indigo-800 to-purple-800 text-white p-6 rounded-2xl flex flex-wrap justify-between items-center gap-4">
+        <div>
+            <h1 class="text-2xl font-bold">🧭 ناوبری اینرسی</h1>
+            <p class="text-indigo-200 text-sm">تخمین موقعیت با شتاب‌سنج + ژیروسکوپ (Dead Reckoning)</p>
         </div>
-
-        <!-- گرید سنسورها -->
-        <div class="p-4 grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-3 bg-gray-50">
-            
-            <!-- 1. شتاب خطی -->
-            <div class="sensor-card">
-                <h3 class="sensor-title">شتاب (m/s²)</h3>
-                <div class="grid grid-cols-1 gap-1 text-center" dir="ltr">
-                    <div class="flex justify-between"><span class="val-label">X</span> <span id="accelX" class="val-data">--</span></div>
-                    <div class="flex justify-between"><span class="val-label">Y</span> <span id="accelY" class="val-data">--</span></div>
-                    <div class="flex justify-between"><span class="val-label">Z</span> <span id="accelZ" class="val-data">--</span></div>
-                    <div class="flex justify-between border-t mt-1 pt-1" dir="ltr><span class="val-label text-indigo-500">Total</span> <span id="accelTotal" class="val-data font-bold">--</span></div>
-                </div>
-            </div>
-
-            <!-- 2. سرعت زاویه‌ای (Gyro) -->
-            <div class="sensor-card">
-                <h3 class="sensor-title">سرعت زاویه‌ای (deg/s)</h3>
-                <div class="grid grid-cols-1 gap-1 text-center" dir="ltr">
-                    <div class="flex justify-between"><span class="val-label">X (Roll)</span> <span id="gyroX" class="val-data" >--</span></div>
-                    <div class="flex justify-between"><span class="val-label">Y (Pitch)</span> <span id="gyroY" class="val-data">--</span></div>
-                    <div class="flex justify-between"><span class="val-label">Z (Yaw)</span> <span id="gyroZ" class="val-data">--</span></div>
-                </div>
-            </div>
-
-            <!-- 3. جهت‌گیری (Orientation) -->
-            <div class="sensor-card">
-                <h3 class="sensor-title">جهت‌گیری (درجه)</h3>
-                <div class="grid grid-cols-1 gap-1 text-center"  dir="ltr">
-                    <div class="flex justify-between"><span class="val-label">Azimuth</span> <span id="azimuthDisplay" class="val-data">--</span></div>
-                    <div class="flex justify-between"><span class="val-label">Pitch</span> <span id="pitchDisplay" class="val-data">--</span></div>
-                    <div class="flex justify-between"><span class="val-label">Roll</span> <span id="rollDisplay" class="val-data">--</span></div>
-                </div>
-            </div>
-
-            <!-- 4. میدان مغناطیسی (Magnetometer) -->
-            <div class="sensor-card">
-                <h3 class="sensor-title">مگنتومتر (µT)</h3>
-                <div class="grid grid-cols-1 gap-1 text-center" dir="ltr">
-                    <div class="flex justify-between"><span class="val-label">X</span> <span id="magX" class="val-data">--</span></div>
-                    <div class="flex justify-between"><span class="val-label">Y</span> <span id="magY" class="val-data">--</span></div>
-                    <div class="flex justify-between"><span class="val-label">Z</span> <span id="magZ" class="val-data">--</span></div>
-                    <div class="flex justify-between border-t mt-1 pt-1"><span class="val-label text-indigo-500">Total</span> <span id="magTotal" class="val-data font-bold">--</span></div>
-                </div>
-                <div id="magStatus" class="text-[0.6rem] text-red-400 mt-1 text-center hidden">پشتیبانی نمی‌شود</div>
-            </div>
-
-            <!-- 5. GPS -->
-            <div class="sensor-card">
-                <h3 class="sensor-title">GPS</h3>
-                <div class="grid grid-cols-1 gap-1 text-center text-xs"  dir="ltr">
-                    <div class="flex justify-between"><span class="val-label">Lat</span> <span id="gpsLat" class="val-data">--</span></div>
-                    <div class="flex justify-between"><span class="val-label">Lon</span> <span id="gpsLon" class="val-data">--</span></div>
-                    <div class="flex justify-between"><span class="val-label">Alt</span> <span id="gpsAlt" class="val-data">--</span></div>
-                    <div class="flex justify-between"><span class="val-label">Spd</span> <span id="gpsSpeed" class="val-data">--</span></div>
-                </div>
-            </div>
+        <div class="flex gap-3 flex-wrap">
+            <button id="navBtn" class="px-6 py-3 bg-emerald-500 hover:bg-emerald-600 rounded-xl font-bold shadow-lg transition flex items-center gap-2">
+                <span>▶</span> شروع ناوبری
+            </button>
+            <button id="resetBtn" class="px-6 py-3 bg-gray-600 hover:bg-gray-700 rounded-xl font-bold shadow-lg transition text-white">
+                ↺ ریست
+            </button>
         </div>
-        
-        <p id="statusMsg" class="px-6 py-2 text-sm text-amber-600 hidden bg-amber-50 border-b border-amber-100"></p>
+    </header>
 
-        <!-- نمایش زنده لاگ (محدود) -->
-        <div class="p-6 bg-white">
-            <h3 class="text-sm font-semibold text-gray-500 mb-2">پیش‌نمایش زنده (آخرین داده‌ها)</h3>
-            <div id="logPreview" class="bg-gray-50 h-32 overflow-hidden relative rounded border border-gray-200 p-2 font-mono text-[0.65rem]">
-                <div class="absolute inset-0 flex items-center justify-center text-gray-300 pointer-events-none z-0">PREVIEW</div>
-                <div id="logContent" class="relative z-10"></div>
-            </div>
-        </div>
-
+    <!-- وضعیت کالیبراسیون و ناوبری -->
+    <div class="grid grid-cols-1 md:grid-cols-4 gap-3">
+        <div class="card flex justify-between"><span class="text-gray-500">وضعیت:</span> <span id="navStatus" class="font-bold text-amber-600">آماده</span></div>
+        <div class="card flex justify-between"><span class="text-gray-500">زمان کالیبره:</span> <span id="calibTime" class="font-mono">0s</span></div>
+        <div class="card flex justify-between"><span class="text-gray-500">دریفت ژایرو (deg/s):</span> <span id="gyroDrift" class="font-mono">--</span></div>
+        <div class="card flex justify-between"><span class="text-gray-500">تعداد نقاط:</span> <span id="pointCount" class="font-mono">0</span></div>
     </div>
 
-    <script type="module">
-        // ============================================================
-        // متغیرهای سراسری
-        // ============================================================
-        let isRecording = false;
-        let wakeLock = null;
-        let logBuffer = [];
-        let gpsWatchId = null;
-        let magSensor = null;
+    <!-- پنل زوایا و موقعیت -->
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <!-- زوایا -->
+        <div class="card">
+            <h3 class="font-bold text-gray-700 border-b pb-2 mb-2">📐 زوایای گوشی (نسبت به افق)</h3>
+            <div class="grid grid-cols-3 gap-2 text-center">
+                <div><span class="text-gray-400 text-xs">Pitch</span><br><span id="pitchAngle" class="value text-blue-600">0.0°</span></div>
+                <div><span class="text-gray-400 text-xs">Roll</span><br><span id="rollAngle" class="value text-green-600">0.0°</span></div>
+                <div><span class="text-gray-400 text-xs">Yaw (Azimuth)</span><br><span id="yawAngle" class="value text-purple-600">0.0°</span></div>
+            </div>
+        </div>
+        <!-- موقعیت -->
+        <div class="card">
+            <h3 class="font-bold text-gray-700 border-b pb-2 mb-2">📍 موقعیت تخمینی (متر)</h3>
+            <div class="grid grid-cols-3 gap-2 text-center">
+                <div><span class="text-gray-400 text-xs">X</span><br><span id="posX" class="value text-red-600">0.00</span></div>
+                <div><span class="text-gray-400 text-xs">Y</span><br><span id="posY" class="value text-red-600">0.00</span></div>
+                <div><span class="text-gray-400 text-xs">Z</span><br><span id="posZ" class="value text-red-600">0.00</span></div>
+            </div>
+        </div>
+    </div>
 
-        // داده‌های جاری
-        const currentData = {
-            accX: 0, accY: 0, accZ: 0, accTotal: 0,
-            gyroX: 0, gyroY: 0, gyroZ: 0,
-            azimuth: 0, pitch: 0, roll: 0,
-            magX: null, magY: null, magZ: null, magTotal: null,
-            lat: null, lon: null, alt: null, acc: null, altAcc: null, head: null, speed: null
-        };
+    <!-- نمایش شتاب تصفیه‌شده و سرعت -->
+    <div class="grid grid-cols-2 md:grid-cols-4 gap-3">
+        <div class="card"><span class="text-gray-400 text-xs">شتاب خالص X</span><br><span id="netAccX" class="value">0.00</span></div>
+        <div class="card"><span class="text-gray-400 text-xs">شتاب خالص Y</span><br><span id="netAccY" class="value">0.00</span></div>
+        <div class="card"><span class="text-gray-400 text-xs">شتاب خالص Z</span><br><span id="netAccZ" class="value">0.00</span></div>
+        <div class="card"><span class="text-gray-400 text-xs">سرعت (m/s)</span><br><span id="speedVal" class="value">0.00</span></div>
+    </div>
 
-        // ============================================================
-        // ارجاع به المان‌های DOM (با نام‌های یکتا)
-        // ============================================================
-        const els = {
-            btn: document.getElementById('toggleButton'),
-            btnText: document.getElementById('btnText'),
-            btnIcon: document.getElementById('btnIcon'),
-            dlBtn: document.getElementById('downloadBtn'),
-            count: document.getElementById('recordCount'),
-            status: document.getElementById('statusMsg'),
-            wakeStatus: document.getElementById('wakeLockStatus'),
-            preview: document.getElementById('logContent'),
-            magStatus: document.getElementById('magStatus'),
+    <!-- پیش‌نمایش لاگ (همان قبل) -->
+    <div class="card">
+        <h3 class="text-sm font-semibold text-gray-500 mb-2">📋 پیش‌نمایش لاگ</h3>
+        <div id="logPreview" class="bg-gray-50 h-32 overflow-hidden relative rounded border p-2 font-mono text-[0.65rem]">
+            <div class="absolute inset-0 flex items-center justify-center text-gray-300 pointer-events-none">PREVIEW</div>
+            <div id="logContent" class="relative z-10"></div>
+        </div>
+    </div>
 
-            // شتاب
-            accX: document.getElementById('accelX'),
-            accY: document.getElementById('accelY'),
-            accZ: document.getElementById('accelZ'),
-            accTotal: document.getElementById('accelTotal'),
+</div>
 
-            // ژیروسکوپ
-            gyroX: document.getElementById('gyroX'),
-            gyroY: document.getElementById('gyroY'),
-            gyroZ: document.getElementById('gyroZ'),
+<script type="module">
+// ================================================================
+//  کتابخانه کوچک ریاضی برداری (برای سادگی)
+// ================================================================
+const vec = {
+    norm: (a) => Math.sqrt(a.reduce((s,v) => s + v*v, 0)),
+    scale: (a, s) => a.map(v => v * s),
+    add: (a, b) => a.map((v,i) => v + b[i]),
+    sub: (a, b) => a.map((v,i) => v - b[i]),
+    cross: (a, b) => [
+        a[1]*b[2] - a[2]*b[1],
+        a[2]*b[0] - a[0]*b[2],
+        a[0]*b[1] - a[1]*b[0]
+    ],
+    dot: (a, b) => a.reduce((s,v,i) => s + v * b[i], 0)
+};
 
-            // جهت‌گیری
-            azimuth: document.getElementById('azimuthDisplay'),
-            pitch: document.getElementById('pitchDisplay'),
-            roll: document.getElementById('rollDisplay'),
+// ================================================================
+//  وضعیت کلی
+// ================================================================
+const state = {
+    isNavigating: false,
+    isCalibrating: false,
+    calibStartTime: 0,
+    calibDuration: 5, // ثانیه
+    gyroDrift: [0, 0, 0], // دریفت در سه محور (deg/s)
+    gyroBiasSamples: [], // برای محاسبه میانگین
 
-            // مگنتومتر
-            magX: document.getElementById('magX'),
-            magY: document.getElementById('magY'),
-            magZ: document.getElementById('magZ'),
-            magTotal: document.getElementById('magTotal'),
+    // داده‌های ناوبری
+    pos: [0, 0, 0],    // موقعیت (متر)
+    vel: [0, 0, 0],    // سرعت (m/s)
+    orientation: [0, 0, 0], // زوایای جهانی (Pitch, Roll, Yaw) به رادیان
+    lastTimestamp: 0,
 
-            // GPS
-            gpsLat: document.getElementById('gpsLat'),
-            gpsLon: document.getElementById('gpsLon'),
-            gpsAlt: document.getElementById('gpsAlt'),
-            gpsSpeed: document.getElementById('gpsSpeed')
-        };
+    // داده‌های سنسور خام
+    rawAcc: [0, 0, 0],
+    rawGyro: [0, 0, 0],
+    rawMag: [0, 0, 0],
+    gravity: [0, 0, 0], // بردار جاذبه در دستگاه
+    netAcc: [0, 0, 0], // شتاب خالص (بدون جاذبه)
 
-        // ============================================================
-        // Wake Lock
-        // ============================================================
-        async function requestWakeLock() {
-            try {
-                if ('wakeLock' in navigator) {
-                    wakeLock = await navigator.wakeLock.request('screen');
-                    els.wakeStatus.textContent = 'WakeLock: فعال';
-                    els.wakeStatus.className = 'px-2 py-1 rounded bg-green-100 text-green-700 text-xs';
-                    wakeLock.addEventListener('release', () => {
-                        els.wakeStatus.textContent = 'WakeLock: غیرفعال';
-                        els.wakeStatus.className = 'px-2 py-1 rounded bg-gray-200 text-gray-500 text-xs';
-                    });
-                }
-            } catch (err) {
-                console.error('WakeLock error:', err);
-            }
+    // آمار
+    pointCount: 0
+};
+
+// ================================================================
+//  المان‌های DOM
+// ================================================================
+const $ = id => document.getElementById(id);
+const el = {
+    navBtn: $('navBtn'),
+    resetBtn: $('resetBtn'),
+    navStatus: $('navStatus'),
+    calibTime: $('calibTime'),
+    gyroDrift: $('gyroDrift'),
+    pointCount: $('pointCount'),
+    pitchAngle: $('pitchAngle'),
+    rollAngle: $('rollAngle'),
+    yawAngle: $('yawAngle'),
+    posX: $('posX'), posY: $('posY'), posZ: $('posZ'),
+    netAccX: $('netAccX'), netAccY: $('netAccY'), netAccZ: $('netAccZ'),
+    speedVal: $('speedVal'),
+    logContent: $('logContent')
+};
+
+// ================================================================
+//  توابع محاسباتی اصلی
+// ================================================================
+
+// 1. محاسبه Pitch و Roll از شتاب (با فرض ایستایی یا حرکت کم)
+function calcTiltFromAcc(acc) {
+    const [ax, ay, az] = acc;
+    const pitch = Math.atan2(ay, Math.sqrt(ax*ax + az*az));
+    const roll = Math.atan2(-ax, az);
+    return { pitch, roll };
+}
+
+// 2. تخمین بردار جاذبه در دستگاه از روی زوایای Pitch و Roll
+function gravityVector(pitch, roll) {
+    const cp = Math.cos(pitch), sp = Math.sin(pitch);
+    const cr = Math.cos(roll), sr = Math.sin(roll);
+    // در دستگاه: g = [ -sin(pitch), sin(roll)*cos(pitch), cos(roll)*cos(pitch) ]
+    return [ -sp, sr * cp, cr * cp ];
+}
+
+// 3. تبدیل شتاب از دستگاه به جهان با استفاده از زوایای اویلر (ZYX)
+function accToWorld(acc, pitch, roll, yaw) {
+    // ماتریس چرخش ZYX (اول Yaw، سپس Pitch، سپس Roll)
+    const cp = Math.cos(pitch), sp = Math.sin(pitch);
+    const cr = Math.cos(roll), sr = Math.sin(roll);
+    const cy = Math.cos(yaw), sy = Math.sin(yaw);
+
+    // R = Rz(yaw) * Ry(pitch) * Rx(roll)
+    // به صورت دستی ضرب می‌کنیم تا ساده شود
+    const R = [
+        [ cy*cp,  cy*sp*sr - sy*cr,  cy*sp*cr + sy*sr ],
+        [ sy*cp,  sy*sp*sr + cy*cr,  sy*sp*cr - cy*sr ],
+        [ -sp,    cp*sr,             cp*cr ]
+    ];
+    // ضرب ماتریس در بردار
+    return [
+        R[0][0]*acc[0] + R[0][1]*acc[1] + R[0][2]*acc[2],
+        R[1][0]*acc[0] + R[1][1]*acc[1] + R[1][2]*acc[2],
+        R[2][0]*acc[0] + R[2][1]*acc[1] + R[2][2]*acc[2]
+    ];
+}
+
+// 4. یکپارچه‌سازی (انتگرال‌گیری) به روش مستطیلی
+function integrate(pos, vel, accWorld, dt) {
+    const newVel = vel.map((v, i) => v + accWorld[i] * dt);
+    const newPos = pos.map((p, i) => p + vel[i] * dt + 0.5 * accWorld[i] * dt * dt);
+    return { pos: newPos, vel: newVel };
+}
+
+// ================================================================
+//  مدیریت سنسورها (با نرخ ثابت ~60Hz)
+// ================================================================
+let lastMotionTime = 0;
+
+function handleMotion(event) {
+    const now = performance.now() / 1000; // seconds
+    const dt = Math.min(now - lastMotionTime, 0.05); // حداکثر 50ms
+    lastMotionTime = now;
+
+    // خواندن داده‌های خام
+    const acc = event.accelerationIncludingGravity || { x:0, y:0, z:0 };
+    const rot = event.rotationRate || { alpha:0, beta:0, gamma:0 };
+
+    state.rawAcc = [acc.x || 0, acc.y || 0, acc.z || 0];
+    state.rawGyro = [rot.beta || 0, rot.gamma || 0, rot.alpha || 0]; // توجه: ترتیب X,Y,Z
+
+    // --- مرحله ۱: محاسبه زاویه کجی (Pitch, Roll) از شتاب ---
+    const tilt = calcTiltFromAcc(state.rawAcc);
+    const pitch = tilt.pitch;
+    const roll = tilt.roll;
+
+    // --- مرحله ۲: تخمین بردار جاذبه در دستگاه ---
+    const grav = gravityVector(pitch, roll);
+    state.gravity = grav;
+
+    // --- مرحله ۳: کم کردن جاذبه از شتاب (شتاب خالص) ---
+    state.netAcc = vec.sub(state.rawAcc, grav);
+
+    // --- مرحله ۴: اگر در حالت ناوبری هستیم ---
+    if (state.isNavigating && state.isCalibrating === false) {
+        // تصحیح دریفت ژیروسکوپ
+        const gyroCorrected = state.rawGyro.map((v, i) => v - state.gyroDrift[i]);
+
+        // به‌روزرسانی زاویه Yaw با استفاده از ژیروسکوپ تصحیح‌شده
+        // توجه: gyroZ مربوط به Yaw است (محور Z)
+        const yawRate = gyroCorrected[2] * Math.PI / 180; // تبدیل به رادیان بر ثانیه
+        state.orientation[2] += yawRate * dt; // Yaw
+
+        // ذخیره زوایا برای نمایش
+        state.orientation[0] = pitch;
+        state.orientation[1] = roll;
+
+        // تبدیل شتاب خالص به دستگاه جهانی
+        const accWorld = accToWorld(state.netAcc, pitch, roll, state.orientation[2]);
+
+        // انتگرال‌گیری برای بدست آوردن سرعت و موقعیت
+        const result = integrate(state.pos, state.vel, accWorld, dt);
+        state.pos = result.pos;
+        state.vel = result.vel;
+
+        // اعمال میرایی کوچک برای جلوگیری از انفجار عددی
+        state.vel = state.vel.map(v => v * 0.999);
+
+        // به‌روزرسانی آمار
+        state.pointCount++;
+    }
+
+    // --- به‌روزرسانی UI ---
+    updateUI(pitch, roll);
+}
+
+// ================================================================
+//  به‌روزرسانی نمایشگر
+// ================================================================
+function updateUI(pitch, roll) {
+    // زوایا
+    el.pitchAngle.textContent = (pitch * 180 / Math.PI).toFixed(1) + '°';
+    el.rollAngle.textContent = (roll * 180 / Math.PI).toFixed(1) + '°';
+    el.yawAngle.textContent = (state.orientation[2] * 180 / Math.PI).toFixed(1) + '°';
+
+    // موقعیت
+    el.posX.textContent = state.pos[0].toFixed(2);
+    el.posY.textContent = state.pos[1].toFixed(2);
+    el.posZ.textContent = state.pos[2].toFixed(2);
+
+    // شتاب خالص و سرعت
+    el.netAccX.textContent = state.netAcc[0].toFixed(2);
+    el.netAccY.textContent = state.netAcc[1].toFixed(2);
+    el.netAccZ.textContent = state.netAcc[2].toFixed(2);
+    const speed = vec.norm(state.vel);
+    el.speedVal.textContent = speed.toFixed(2);
+
+    el.pointCount.textContent = state.pointCount;
+
+    // نمایش لاگ (هر ۵ نقطه)
+    if (state.pointCount % 5 === 0) {
+        const time = new Date().toLocaleTimeString();
+        const div = document.createElement('div');
+        div.className = 'log-entry';
+        div.textContent = `${time} | Pos: ${state.pos.map(v=>v.toFixed(1)).join(', ')} | Spd: ${speed.toFixed(1)}`;
+        el.logContent.insertBefore(div, el.logContent.firstChild);
+        if (el.logContent.children.length > 8) el.logContent.removeChild(el.logContent.lastChild);
+    }
+}
+
+// ================================================================
+//  جهت‌گیری (برای دریافت Azimuth)
+// ================================================================
+function handleOrientation(event) {
+    // فقط برای نمایش Azimuth (در صورت نیاز)
+    // فعلاً از ژیروسکوپ برای Yaw استفاده می‌کنیم، ولی اینجا می‌توانیم مقدار اولیه را تنظیم کنیم
+    if (event.alpha !== null && state.pointCount === 0) {
+        // تنظیم اولیه Yaw بر اساس قطبنما (در شروع)
+        // state.orientation[2] = event.alpha * Math.PI / 180;
+    }
+}
+
+// ================================================================
+//  کالیبراسیون دریفت ژیروسکوپ (۵ ثانیه)
+// ================================================================
+function startCalibration() {
+    if (state.isNavigating) return;
+    state.isCalibrating = true;
+    state.calibStartTime = performance.now() / 1000;
+    state.gyroBiasSamples = [];
+    el.navStatus.textContent = '⏳ در حال کالیبره...';
+    el.navStatus.className = 'font-bold text-amber-600';
+
+    // جمع‌آوری نمونه‌های ژیروسکوپ به مدت ۵ ثانیه
+    const collectSamples = () => {
+        if (!state.isCalibrating) return;
+        const now = performance.now() / 1000;
+        const elapsed = now - state.calibStartTime;
+        el.calibTime.textContent = elapsed.toFixed(1) + 's';
+
+        // ثبت نمونه
+        state.gyroBiasSamples.push([...state.rawGyro]);
+
+        if (elapsed < state.calibDuration) {
+            requestAnimationFrame(collectSamples);
+        } else {
+            finishCalibration();
         }
+    };
+    collectSamples();
+}
 
-        function releaseWakeLock() {
-            if (wakeLock) {
-                wakeLock.release();
-                wakeLock = null;
-            }
-        }
+function finishCalibration() {
+    state.isCalibrating = false;
+    // محاسبه میانگین دریفت
+    if (state.gyroBiasSamples.length === 0) {
+        el.navStatus.textContent = '❌ خطا در کالیبره';
+        return;
+    }
+    const sum = state.gyroBiasSamples.reduce((acc, sample) => {
+        return acc.map((v, i) => v + sample[i]);
+    }, [0, 0, 0]);
+    state.gyroDrift = sum.map(v => v / state.gyroBiasSamples.length);
 
-        // ============================================================
-        // سنسورها
-        // ============================================================
+    el.gyroDrift.textContent = state.gyroDrift.map(v => v.toFixed(2)).join(', ');
+    el.navStatus.textContent = '✅ کالیبره شد';
+    el.navStatus.className = 'font-bold text-green-600';
 
-        // 1. شتاب + ژیروسکوپ
-        function handleMotion(event) {
-            const acc = event.accelerationIncludingGravity || {};
-            currentData.accX = acc.x || 0;
-            currentData.accY = acc.y || 0;
-            currentData.accZ = acc.z || 0;
-            currentData.accTotal = Math.sqrt(
-                currentData.accX ** 2 +
-                currentData.accY ** 2 +
-                currentData.accZ ** 2
-            );
+    // شروع ناوبری
+    startNavigation();
+}
 
-            const rot = event.rotationRate || {};
-            currentData.gyroX = rot.beta || 0;
-            currentData.gyroY = rot.gamma || 0;
-            currentData.gyroZ = rot.alpha || 0;
+// ================================================================
+//  شروع و توقف ناوبری
+// ================================================================
+function startNavigation() {
+    if (state.isNavigating) return;
+    state.isNavigating = true;
+    state.pos = [0, 0, 0];
+    state.vel = [0, 0, 0];
+    state.orientation = [0, 0, 0]; // Pitch, Roll, Yaw
+    state.pointCount = 0;
+    el.navStatus.textContent = '🚀 ناوبری فعال';
+    el.navStatus.className = 'font-bold text-blue-600';
+    el.navBtn.textContent = '⏹ توقف ناوبری';
+    el.navBtn.className = 'px-6 py-3 bg-rose-600 hover:bg-rose-700 rounded-xl font-bold shadow-lg transition text-white';
+}
 
-            // به‌روزرسانی UI
-            els.accX.textContent = currentData.accX.toFixed(3);
-            els.accY.textContent = currentData.accY.toFixed(3);
-            els.accZ.textContent = currentData.accZ.toFixed(3);
-            els.accTotal.textContent = currentData.accTotal.toFixed(3);
+function stopNavigation() {
+    state.isNavigating = false;
+    el.navStatus.textContent = '⏹ متوقف';
+    el.navStatus.className = 'font-bold text-gray-600';
+    el.navBtn.textContent = '▶ شروع ناوبری';
+    el.navBtn.className = 'px-6 py-3 bg-emerald-500 hover:bg-emerald-600 rounded-xl font-bold shadow-lg transition text-white';
+}
 
-            els.gyroX.textContent = currentData.gyroX.toFixed(2);
-            els.gyroY.textContent = currentData.gyroY.toFixed(2);
-            els.gyroZ.textContent = currentData.gyroZ.toFixed(2);
+function resetNavigation() {
+    stopNavigation();
+    state.pos = [0, 0, 0];
+    state.vel = [0, 0, 0];
+    state.orientation = [0, 0, 0];
+    state.pointCount = 0;
+    state.gyroDrift = [0, 0, 0];
+    state.gyroBiasSamples = [];
+    el.gyroDrift.textContent = '--';
+    el.navStatus.textContent = '🔄 ریست شد';
+    el.navStatus.className = 'font-bold text-gray-600';
+    el.calibTime.textContent = '0s';
+    // پاک کردن لاگ
+    el.logContent.innerHTML = '';
+    updateUI(0, 0);
+}
 
-            if (isRecording) recordDataPoint();
-        }
+// ================================================================
+//  رویداد دکمه ناوبری
+// ================================================================
+el.navBtn.addEventListener('click', async () => {
+    if (state.isNavigating) {
+        stopNavigation();
+        return;
+    }
+    // اگر قبلاً کالیبره شده و ناوبری متوقف است، مستقیم شروع کن
+    if (state.gyroDrift.some(v => v !== 0) && !state.isNavigating) {
+        startNavigation();
+        return;
+    }
+    // در غیر این صورت، کالیبره کن
+    el.navStatus.textContent = '⏳ شروع کالیبراسیون...';
+    startCalibration();
+});
 
-        // 2. جهت‌گیری (Azimuth, Pitch, Roll)
-        function handleOrientation(event) {
-            currentData.azimuth = event.alpha || 0;
-            currentData.pitch   = event.beta  || 0;
-            currentData.roll    = event.gamma || 0;
+el.resetBtn.addEventListener('click', resetNavigation);
 
-            els.azimuth.textContent = currentData.azimuth.toFixed(1);
-            els.pitch.textContent   = currentData.pitch.toFixed(1);
-            els.roll.textContent    = currentData.roll.toFixed(1);
-        }
+// ================================================================
+//  راه‌اندازی سنسورها
+// ================================================================
+window.addEventListener('devicemotion', handleMotion);
+window.addEventListener('deviceorientation', handleOrientation);
 
-        // 3. مگنتومتر (با مدیریت خطا و مجوز)
-        async function initMagnetometer() {
-            // اگر API وجود نداشته باشد
-            if (!('Magnetometer' in window)) {
-                els.magStatus.classList.remove('hidden');
-                els.magStatus.textContent = '❌ مرورگر پشتیبانی نمی‌کند';
-                return;
-            }
+// GPS (فقط برای نمایش، در ناوبری استفاده نمی‌شود)
+if (navigator.geolocation) {
+    navigator.geolocation.watchPosition(
+        (pos) => {
+            // فقط جهت اطلاع، استفاده نمی‌شود
+        },
+        () => {},
+        { enableHighAccuracy: true }
+    );
+}
 
-            try {
-                // بررسی مجوز (در صورت پشتیبانی)
-                if (navigator.permissions && navigator.permissions.query) {
-                    const perm = await navigator.permissions.query({ name: 'magnetometer' });
-                    if (perm.state === 'denied') {
-                        els.magStatus.classList.remove('hidden');
-                        els.magStatus.textContent = '⛔ مجوز رد شد';
-                        return;
-                    }
-                }
-
-                magSensor = new Magnetometer({ frequency: 10 });
-
-                magSensor.addEventListener('reading', () => {
-                    currentData.magX = magSensor.x;
-                    currentData.magY = magSensor.y;
-                    currentData.magZ = magSensor.z;
-                    currentData.magTotal = Math.sqrt(
-                        magSensor.x ** 2 +
-                        magSensor.y ** 2 +
-                        magSensor.z ** 2
-                    );
-
-                    els.magX.textContent = magSensor.x.toFixed(1);
-                    els.magY.textContent = magSensor.y.toFixed(1);
-                    els.magZ.textContent = magSensor.z.toFixed(1);
-                    els.magTotal.textContent = currentData.magTotal.toFixed(1);
-
-                    // در صورت موفقیت، پیام خطا را مخفی کن
-                    els.magStatus.classList.add('hidden');
-                });
-
-                magSensor.addEventListener('error', (event) => {
-                    console.warn('Magnetometer error:', event.error);
-                    els.magStatus.classList.remove('hidden');
-                    els.magStatus.textContent = `⚠️ خطا: ${event.error?.message || 'ناشناخته'}`;
-                });
-
-                magSensor.start();
-                console.log('Magnetometer started successfully.');
-
-            } catch (error) {
-                console.error('Magnetometer init error:', error);
-                els.magStatus.classList.remove('hidden');
-                els.magStatus.textContent = `❌ راه‌اندازی نشد: ${error.message || ''}`;
-            }
-        }
-
-        // 4. GPS
-        function handleGPS(position) {
-            const c = position.coords;
-            currentData.lat   = c.latitude;
-            currentData.lon   = c.longitude;
-            currentData.alt   = c.altitude;
-            currentData.acc   = c.accuracy;
-            currentData.altAcc = c.altitudeAccuracy;
-            currentData.head  = c.heading;
-            currentData.speed = c.speed;
-
-            els.gpsLat.textContent  = c.latitude.toFixed(5);
-            els.gpsLon.textContent  = c.longitude.toFixed(5);
-            els.gpsAlt.textContent  = c.altitude ? c.altitude.toFixed(0) : '-';
-            els.gpsSpeed.textContent = c.speed ? c.speed.toFixed(1) : '-';
-        }
-
-        // ============================================================
-        // هسته ضبط داده
-        // ============================================================
-        function recordDataPoint() {
-            const now = new Date();
-            const timeString = now.toISOString();
-
-            const row = [
-                timeString,
-                currentData.accX, currentData.accY, currentData.accZ, currentData.accTotal,
-                currentData.gyroX, currentData.gyroY, currentData.gyroZ,
-                currentData.azimuth, currentData.pitch, currentData.roll,
-                currentData.magX !== null ? currentData.magX : '',
-                currentData.magY !== null ? currentData.magY : '',
-                currentData.magZ !== null ? currentData.magZ : '',
-                currentData.magTotal !== null ? currentData.magTotal : '',
-                currentData.lat, currentData.lon, currentData.alt,
-                currentData.acc, currentData.altAcc, currentData.head, currentData.speed
-            ];
-
-            logBuffer.push(row);
-            els.count.textContent = logBuffer.length;
-
-            if (logBuffer.length % 15 === 0) {
-                updatePreview(row);
-            }
-        }
-
-        function updatePreview(row) {
-            const div = document.createElement('div');
-            div.className = 'log-entry';
-            const time = row[0].split('T')[1]?.replace('Z', '') || '';
-            const accT = Number(row[4]).toFixed(1);
-            const azi = Number(row[7]).toFixed(0);
-            div.textContent = `${time} | AccT:${accT} | Azi:${azi}`;
-            els.preview.insertBefore(div, els.preview.firstChild);
-            if (els.preview.children.length > 8) {
-                els.preview.removeChild(els.preview.lastChild);
-            }
-        }
-
-        // ============================================================
-        // دانلود CSV
-        // ============================================================
-        function generateCSV() {
-            if (logBuffer.length === 0) {
-                alert('داده‌ای وجود ندارد.');
-                return;
-            }
-
-            const headers = [
-                'Timestamp_ISO',
-                'Accel_X (m/s2)', 'Accel_Y (m/s2)', 'Accel_Z (m/s2)', 'Total_Accel (m/s2)',
-                'Gyro_X_Rate (deg/s)', 'Gyro_Y_Rate (deg/s)', 'Gyro_Z_Rate (deg/s)',
-                'Azimuth (deg)', 'Pitch (deg)', 'Roll (deg)',
-                'Mag_Field_X (uT)', 'Mag_Field_Y (uT)', 'Mag_Field_Z (uT)', 'Total_Mag_Field (uT)',
-                'Latitude', 'Longitude', 'Altitude (m)',
-                'Accuracy (m)', 'Alt_Accuracy (m)', 'Heading (deg)', 'Speed (m/s)'
-            ];
-
-            const rows = logBuffer.map(row => row.join(','));
-            const csvContent = headers.join(',') + '\n' + rows.join('\n');
-
-            const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
-            const url = URL.createObjectURL(blob);
-            const link = document.createElement('a');
-            link.href = url;
-            link.download = `full_sensor_log_${new Date().toISOString().replace(/[:.]/g, '-')}.csv`;
-            document.body.appendChild(link);
-            link.click();
-            document.body.removeChild(link);
-            URL.revokeObjectURL(url);
-        }
-
-        // ============================================================
-        // کنترلر دکمه ضبط
-        // ============================================================
-        async function toggleRecording() {
-            if (!isRecording) {
-                // درخواست مجوز جهت‌گیری (برای iOS)
-                if (typeof DeviceOrientationEvent.requestPermission === 'function') {
-                    const perm = await DeviceOrientationEvent.requestPermission();
-                    if (perm !== 'granted') {
-                        alert('مجوز جهت‌گیری رد شد.');
-                        return;
-                    }
-                }
-
-                // راه‌اندازی مگنتومتر (در صورت پشتیبانی)
-                await initMagnetometer();
-
-                // پاک کردن بافر قبلی
-                logBuffer = [];
-                els.count.textContent = '0';
-                els.preview.innerHTML = '';
-
-                await requestWakeLock();
-
-                isRecording = true;
-                els.btn.className = 'toggle-btn px-6 py-3 bg-rose-600 hover:bg-rose-700 rounded-xl font-bold shadow-lg transition flex items-center gap-2 text-white';
-                els.btnText.textContent = 'توقف ضبط';
-                els.btnIcon.textContent = '⏹';
-                els.dlBtn.disabled = true;
-                els.dlBtn.classList.add('bg-gray-500', 'cursor-not-allowed');
-                els.dlBtn.classList.remove('bg-blue-600');
-                els.status.classList.remove('hidden');
-                els.status.textContent = 'در حال ضبط... لطفاً صفحه را نبندید.';
-
-            } else {
-                // توقف ضبط
-                isRecording = false;
-                releaseWakeLock();
-
-                if (magSensor) {
-                    try { magSensor.stop(); } catch (_) {}
-                    magSensor = null;
-                }
-
-                els.btn.className = 'toggle-btn px-6 py-3 bg-emerald-500 hover:bg-emerald-600 rounded-xl font-bold shadow-lg transition flex items-center gap-2 text-white';
-                els.btnText.textContent = 'شروع مجدد';
-                els.btnIcon.textContent = '▶';
-                els.dlBtn.disabled = false;
-                els.dlBtn.classList.remove('bg-gray-500', 'cursor-not-allowed');
-                els.dlBtn.classList.add('bg-blue-600', 'hover:bg-blue-700', 'text-white');
-                els.status.textContent = 'ضبط متوقف شد.';
-            }
-        }
-
-        // ============================================================
-        // اتصال رویدادها
-        // ============================================================
-        els.btn.addEventListener('click', toggleRecording);
-        els.dlBtn.addEventListener('click', generateCSV);
-
-        window.addEventListener('devicemotion', handleMotion);
-        window.addEventListener('deviceorientation', handleOrientation);
-
-        // GPS
-        if (navigator.geolocation) {
-            gpsWatchId = navigator.geolocation.watchPosition(
-                handleGPS,
-                (err) => console.warn('GPS error:', err),
-                { enableHighAccuracy: true, maximumAge: 0 }
-            );
-        }
-
-        console.log('✅ Sensor Logger initialized.');
-    </script>
+// مقداردهی اولیه
+console.log('🧭 ناوبری اینرسی آماده است.');
+</script>
 </body>
 </html>
