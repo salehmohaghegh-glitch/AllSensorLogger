@@ -1,12 +1,13 @@
+
 # 📱 سنسورلاگر جامع | All‑in‑One Sensor Data Logger
 
 <div dir="rtl" align="right">
 
-**یک ابزار تحت وب برای ضبط هم‌زمان داده‌های شتاب‌سنج، ژیروسکوپ، قطبنما، میدان مغناطیسی و GPS در مرورگر موبایل – با قابلیت خروجی CSV و نمایش زنده.**
+**یک ابزار تحت وب و اپلیکیشن اندرویدی برای ضبط هم‌زمان داده‌های شتاب‌سنج، ژیروسکوپ، قطبنما، میدان مغناطیسی و GPS با قابلیت ناوبری اینرسی (Dead Reckoning) و خروجی CSV.**
 
 </div>
 
-**A web‑based tool to simultaneously log accelerometer, gyroscope, magnetometer, orientation and GPS data directly in your mobile browser – with live preview and CSV export.**
+**A web‑based tool and Android app for simultaneously logging accelerometer, gyroscope, magnetometer, orientation and GPS data with inertial navigation (Dead Reckoning) and CSV export.**
 
 ---
 
@@ -15,24 +16,30 @@
 <div dir="rtl" align="right">
 
 - 🔄 **ضبط همزمان** داده‌های ۵ سنسور اصلی دستگاه  
+- 🧭 **ناوبری اینرسی (Dead Reckoning)** با فیلتر مکمل و کالیبراسیون خودکار  
 - 📊 **نمایش زنده** روی داشبورد به‌روز‌شونده  
 - 📥 **خروجی CSV** استاندارد برای تحلیل در اکسل، پایتون یا متلب  
-- 📱 **بدون نیاز به نصب** – فقط یک مرورگر کافیست  
+- 📱 **بدون نیاز به نصب** – فقط یک مرورگر کافیست (نسخه وب)  
+- 📦 **اپلیکیشن اندروید** – قابل ساخت با Capacitor (APK)  
 - 🔋 **Wake Lock** برای جلوگیری از خواب صفحه هنگام ضبط طولانی  
 - 🌐 **پشتیبانی از GPS** با دقت بالا (موقعیت، سرعت، ارتفاع)  
 - 🧲 **پشتیبانی از مگنتومتر** (در مرورگرهای پشتیبان)  
 - 📋 **پیش‌نمایش لاگ** به‌صورت لحظه‌ای  
+- ⚙️ **کالیبراسیون خودکار** بایاس شتاب‌سنج و ژیروسکوپ (۵ ثانیه)  
 
 </div>
 
 - 🔄 **Simultaneous logging** of 5 core device sensors  
+- 🧭 **Dead Reckoning navigation** with complementary filter and auto‑calibration  
 - 📊 **Live dashboard** with real‑time updates  
 - 📥 **Standard CSV export** for Excel, Python or MATLAB  
-- 📱 **No installation** – runs in any modern browser  
+- 📱 **No installation** – runs in any modern browser (web version)  
+- 📦 **Android app** – buildable with Capacitor (APK)  
 - 🔋 **Wake Lock API** to keep screen on during long recordings  
 - 🌐 **High‑accuracy GPS** (location, speed, altitude)  
 - 🧲 **Magnetometer support** (on compatible browsers)  
 - 📋 **Live log preview** as data arrives  
+- ⚙️ **Auto‑calibration** of accelerometer and gyroscope bias (5 seconds)  
 
 ---
 
@@ -47,11 +54,11 @@
 ## 🚀 اجرا | Live Demo
 
 **آدرس صفحات گیت‌هاب (پس از انتشار):**  
-👉 [[https://salehmohaghegh-glitch.github.io/sensor-logger/](https://github.com/salehmohaghegh-glitch/AllSensorLogger)]([https://salehmohaghegh-glitch.github.io/sensor-logger/](https://github.com/salehmohaghegh-glitch/AllSensorLogger))
+👉 [https://salehmohaghegh-glitch.github.io/AllSensorLogger/](https://salehmohaghegh-glitch.github.io/AllSensorLogger/)
 
 ---
 
-## 📋 نحوه استفاده | How to Use
+## 📋 نحوه استفاده (نسخه وب) | How to Use (Web Version)
 
 <div dir="rtl" align="right">
 
@@ -68,6 +75,86 @@
 3. Move or shake your device to capture sensor data.  
 4. Press **Stop Recording** when finished.  
 5. Click **Download CSV** to save the logged data.
+
+---
+
+## 📦 ساخت اپلیکیشن اندروید (APK) | Building Android App (APK)
+
+<div dir="rtl" align="right">
+
+پروژه با **CapacitorJS** به اپلیکیشن اندروید تبدیل شده است. فایل‌های منبع اندروید در پوشه‌ی `android/` قرار دارند.
+
+### پیش‌نیازها
+
+- **Node.js** (نسخه ۱۸ یا بالاتر)
+- **Java JDK 17** یا جدیدتر
+- **Android Studio** با SDK Tools نصب‌شده
+- **Gradle** (به‌صورت خودکار توسط Android Studio مدیریت می‌شود)
+
+### مراحل ساخت
+
+۱. مخزن را کلون کنید:
+   ```bash
+   git clone https://github.com/salehmohaghegh-glitch/AllSensorLogger.git
+   cd AllSensorLogger
+   ```
+
+۲. وابستگی‌های Node.js را نصب کنید:
+   ```bash
+   npm install
+   ```
+
+۳. پروژه را با Capacitor همگام‌سازی کنید:
+   ```bash
+   npx cap sync
+   ```
+
+۴. پروژه را در Android Studio باز کنید:
+   ```bash
+   npx cap open android
+   ```
+
+۵. در Android Studio، از منوی **Build** → **Build Bundle(s) / APK(s)** → **Build APK(s)** را انتخاب کنید.
+
+۶. فایل `app-debug.apk` در مسیر `android/app/build/outputs/apk/debug/` ایجاد می‌شود.
+
+</div>
+
+The project has been converted to an Android app using **CapacitorJS**. Android source files are located in the `android/` folder.
+
+### Prerequisites
+
+- **Node.js** (version 18 or higher)
+- **Java JDK 17** or newer
+- **Android Studio** with SDK Tools installed
+- **Gradle** (managed automatically by Android Studio)
+
+### Build Steps
+
+1. Clone the repository:
+   ```bash
+   git clone https://github.com/salehmohaghegh-glitch/AllSensorLogger.git
+   cd AllSensorLogger
+   ```
+
+2. Install Node.js dependencies:
+   ```bash
+   npm install
+   ```
+
+3. Sync the project with Capacitor:
+   ```bash
+   npx cap sync
+   ```
+
+4. Open the project in Android Studio:
+   ```bash
+   npx cap open android
+   ```
+
+5. In Android Studio, go to **Build** → **Build Bundle(s) / APK(s)** → **Build APK(s)**.
+
+6. The `app-debug.apk` file will be generated at `android/app/build/outputs/apk/debug/`.
 
 ---
 
@@ -95,14 +182,90 @@
 ## 🛠 تکنولوژی‌های استفاده‌شده | Tech Stack
 
 - **HTML5 / CSS3 / JavaScript (ES Module)**
-- **[Tailwind CSS](https://tailwindcss.com/)** – برای استایل‌بندی سریع و واکنش‌گرا
+- **[Tailwind CSS](https://tailwindcss.com/)** – استایل‌بندی سریع و واکنش‌گرا
 - **DeviceMotion API** – شتاب‌سنج و ژیروسکوپ
 - **DeviceOrientation API** – جهت‌گیری (آزیموت، پیچ، رول)
 - **Geolocation API** – موقعیت‌یابی GPS
 - **Magnetometer API** – میدان مغناطیسی (نسل جدید)
 - **Wake Lock API** – جلوگیری از خاموش شدن صفحه
-- **Font: Vazirmatn + Inter** – برای نمایش زیبا در هر دو زبان
+- **[CapacitorJS](https://capacitorjs.com/)** – تبدیل به اپلیکیشن اندروید
+- **Font: Vazirmatn + Inter** – نمایش زیبا در هر دو زبان
 
 ---
 
 ## 📁 ساختار فایل‌ها | File Structure
+
+```
+Sensorlogger/
+├── index.html                      # صفحه اصلی برنامه (وب)
+├── android/                        # پروژه اندروید (تولیدشده توسط Capacitor)
+│   ├── app/
+│   │   ├── src/main/               # کدها و منابع اصلی اندروید
+│   │   ├── build.gradle            # پیکربندی ماژول
+│   │   └── proguard-rules.pro      # قوانین ProGuard
+│   ├── gradle/wrapper/             # Gradle Wrapper
+│   ├── build.gradle                # پیکربندی سطح پروژه
+│   ├── settings.gradle             # تنظیمات پروژه
+│   ├── gradle.properties           # ویژگی‌های Gradle
+│   └── local.properties            # (محلی – به مخزن اضافه نمی‌شود)
+├── capacitor.config.json           # پیکربندی Capacitor
+├── package.json                    # وابستگی‌های Node.js
+└── README.md                       # این فایل
+```
+
+---
+
+## 🤝 مشارکت | Contributing
+
+<div dir="rtl" align="right">
+
+پیشنهادات، گزارش باگ و درخواست‌های Pull شما با خوش‌آمد گویی مواجه می‌شوند.  
+لطفاً ابتدا یک **Issue** باز کنید تا دربارهٔ تغییرات مورد نظر گفت‌وگو کنیم.
+
+</div>
+
+Suggestions, bug reports and pull requests are very welcome.  
+Please open an **Issue** first to discuss your proposed changes.
+
+---
+
+## 📄 مجوز | License
+
+این پروژه تحت مجوز **MIT** منتشر شده است – استفاده، تغییر و توزیع آن آزاد است.
+
+This project is released under the **MIT License** – free to use, modify and distribute.
+
+---
+
+## 🙏 سپاس‌گزاری | Acknowledgments
+
+- الهام‌گرفته از پروژه‌های متن‌باز حوزهٔ جمع‌آوری داده‌های حرکتی  
+- تشکر ویژه از توسعه‌دهندگان مرورگرها برای پیاده‌سازی APIهای سنسور  
+- تشکر از تیم **CapacitorJS** برای ابزار قدرتمند تبدیل وب به اپلیکیشن موبایل
+
+---
+
+<div dir="rtl" align="center">
+
+**🇮🇷 ساخته شده با ❤️ در ایران | Made with ❤️ in Iran**
+
+</div>
+```
+
+---
+
+## ✅ تغییرات اعمال‌شده در README جدید
+
+| بخش | توضیح |
+|------|-------|
+| **ویژگی‌ها** | اضافه شدن «ناوبری اینرسی» و «کالیبراسیون خودکار» به لیست |
+| **ساخت اپلیکیشن اندروید** | اضافه شدن یک بخش کامل با پیش‌نیازها و مراحل گام‌به‌گام برای ساخت APK |
+| **ساختار فایل‌ها** | به‌روزرسانی برای نشان دادن پوشه‌ی `android/` و محتویات آن |
+| **تکنولوژی‌ها** | اضافه شدن **CapacitorJS** به لیست |
+| **سپاس‌گزاری** | اضافه شدن تشکر از تیم CapacitorJS |
+
+---
+
+برای استفاده، محتوای بالا را در فایل `README.md` در ریشه‌ی پروژه کپی کنید. همچنین می‌توانید تصویر پیش‌نمایش را با یک اسکرین‌شات واقعی از برنامه جایگزین کنید.
+
+اگر نیاز به تغییر یا تنظیم خاصی دارید، خوشحال می‌شوم کمک کنم. 😊
