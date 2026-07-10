@@ -1,0 +1,50 @@
+# ============================================
+# Android Gradle build outputs
+# ============================================
+android/.gradle/
+android/build/
+android/app/build/
+android/capacitor-cordova-android-plugins/build/
+
+# ============================================
+# Android Studio IDE files
+# ============================================
+android/.idea/
+android/*.iml
+android/app/*.iml
+android/.cxx/
+android/captures/
+
+# ============================================
+# Local configuration (SDK path, etc.)
+# ============================================
+android/local.properties
+android/app/local.properties
+
+# ============================================
+# Release APK (generated)
+# ============================================
+android/app/release/
+
+# ============================================
+# Capacitor generated files (synced automatically)
+# ============================================
+android/app/src/main/assets/public/
+android/app/src/main/assets/capacitor.config.json
+android/app/src/main/assets/capacitor.plugins.json
+android/app/src/main/assets/native-bridge.js
+
+# ============================================
+# Node.js
+# ============================================
+node_modules/
+npm-debug.log
+package-lock.json
+
+# ============================================
+# System files
+# ============================================
+.DS_Store
+Thumbs.db
+*.tmp
+*.log
